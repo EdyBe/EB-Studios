@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize all functionality
     initNavigation();
+    initFlipCard();
     initTestimonialSlider();
     initContactForm();
     initScrollAnimations();
@@ -11,10 +12,70 @@ document.addEventListener('DOMContentLoaded', function() {
     initImageErrorHandling();
     enhanceFloatingCards();
     initParallaxEffect();
-    
+
     // Console welcome message
     console.log('🎨 EB Studios Website loaded successfully! 🚀');
 });
+
+// Flip Card functionality
+function initFlipCard() {
+    const flipCard = document.getElementById('flipCard');
+    const beforeVideo = document.getElementById('beforeVideo');
+    const afterVideo = document.getElementById('afterVideo');
+
+    if (!flipCard || !beforeVideo || !afterVideo) {
+        console.log('Flip card elements not found - feature may not be on this page');
+        return;
+    }
+
+    let isFlipped = false;
+
+    // Play the before video initially
+    beforeVideo.play().catch(err => {
+        console.log('Autoplay prevented for before video:', err);
+    });
+
+    // Handle card click
+    flipCard.addEventListener('click', function() {
+        isFlipped = !isFlipped;
+        flipCard.classList.toggle('flipped');
+
+        // Manage video playback
+        if (isFlipped) {
+            // Pause before video and play after video
+            beforeVideo.pause();
+            afterVideo.play().catch(err => {
+                console.log('Could not play after video:', err);
+            });
+        } else {
+            // Pause after video and play before video
+            afterVideo.pause();
+            beforeVideo.play().catch(err => {
+                console.log('Could not play before video:', err);
+            });
+        }
+    });
+
+    // Intersection Observer to play/pause videos when in viewport
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Card is visible - play the active video
+                if (isFlipped) {
+                    afterVideo.play().catch(err => console.log('Video play prevented:', err));
+                } else {
+                    beforeVideo.play().catch(err => console.log('Video play prevented:', err));
+                }
+            } else {
+                // Card is not visible - pause both videos
+                beforeVideo.pause();
+                afterVideo.pause();
+            }
+        });
+    }, { threshold: 0.5 });
+
+    observer.observe(flipCard);
+}
 
 // Navigation functionality
 function initNavigation() {
